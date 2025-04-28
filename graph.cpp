@@ -1,20 +1,23 @@
 #include <iostream>
-#include <map>
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include "bmp.hpp"
+#include <map> // BST 
+#include <unordered_map> // hash table
+#include <vector> // dynamic array
+#include <string> // 
+
+
 #include "tinyxml2.h"
 
 using namespace tinyxml2;
 
 struct Node {
+    //long long id;
     double lat, lon;
 };
 
 struct Way {
     std::vector<long long> node_refs;
     bool is_highway = false;
+    bool is_one_way = false;
     std::string name; // To store the road name if available
 };
 
@@ -60,33 +63,31 @@ void parse_osm(const char* filename) {
                     const char* v = child->Attribute("v");
                     if (k && std::string(k) == "highway") {
                         is_hw = true;
-
-
-                        
                     }
                     if (k && std::string(k) == "name") {
                         way.name = v ? v : "";
                     }
+                    if (k && std::string(k) == "oneway" && std::string(v)=="yes") {
+                        way.is_one_way=true;
+                    }
+                    
                 }
             }
             way.is_highway = is_hw;
-            ways.push_back(way);
+            if(way.is_higway){
+                ways.push_back(way);
 
             // Add edges to the graph (undirected)
             for (size_t i = 1; i < way.node_refs.size(); ++i) {
                 long long node1 = way.node_refs[i - 1];
                 long long node2 = way.node_refs[i];
-                if (!way.name.empty()) {
                     graph[node1][node2] = way.name;
-                    graph[node2][node1] = way.name;  // Since roads are usually bidirectional
-                }
-            }
-        }
-    }
-}
-
-int scale(double value, double minv, double maxv, int size) {
-    return static_cast<int>((value - minv) / (maxv - minv) * (size - 1));
+                    if (!way.is_one_way)
+                        graph[node2][node1] = way.name;  // Since roads are usually bidirectional
+            }//for
+           }// is_highway
+        }//way
+    } //main loop
 }
 
 
