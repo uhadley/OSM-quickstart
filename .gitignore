@@ -1,0 +1,5 @@
+*.o
+data/new-york*.osm
+main
+highways
+graph

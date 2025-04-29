@@ -74,7 +74,7 @@ void parse_osm(const char* filename) {
                 }
             }
             way.is_highway = is_hw;
-            if(way.is_higway){
+            if(way.is_highway){
                 ways.push_back(way);
 
             // Add edges to the graph (undirected)
