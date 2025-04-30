@@ -1,3 +1,6 @@
+#pragma once
+#include <sstream>
+
 struct color{
     int r;
     int g;

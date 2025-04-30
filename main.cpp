@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
     std::string output_file;
 
     if (argc != 3) {
-        std::cout << "Usage: highways <input> <ouput> \n" ;
+        std::cout << "Usage: ./main <input> <ouput> \n" ;
         return -1;
     }
     

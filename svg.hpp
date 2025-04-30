@@ -1,6 +1,6 @@
 #include <fstream>
 #include <string>
-
+#include  "color.h"
 class svg {
 private:
     std::ofstream svgFile;
