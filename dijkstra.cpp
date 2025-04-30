@@ -103,14 +103,15 @@ void dijkstra(long long start) {
     unordered_map<long long, bool> visited;
 
     for (auto& node : graph){
+        std::cout << "**************************\n";
+        std::cout << node.first <<"\n";
+        std::cout << "**************************\n";
         distance[node.first] = numeric_limits<double>::infinity();
         for (auto n:node.second)
             distance[n.first]= numeric_limits<double>::infinity();
-        
     }
     distance[start]=0;
-    
-
+  
     pushHeap({start, 0.0});
 
     while (!heap.empty()) {
