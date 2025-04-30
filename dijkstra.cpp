@@ -10,12 +10,12 @@ typedef pair<string, double> label;
 unordered_map<long long, unordered_map<long long, label>> graph;
 
 // Heap node
-struct Node {
+struct HeapNode {
     long long id;
     double dist;
 };
 
-vector<Node> heap;
+vector<HeapNode> heap;
 unordered_map<long long, int> heapIndex;
 
 int parent(int i) { return (i - 1) / 2; }
@@ -51,14 +51,14 @@ void heapifyDown(int i) {
     }
 }
 
-void pushHeap(Node n) {
+void pushHeap(HeapNode n) {
     heap.push_back(n);
     heapIndex[n.id] = heap.size() - 1;
     heapifyUp(heap.size() - 1);
 }
 
-Node popHeap() {
-    Node top = heap[0];
+HeapNode popHeap() {
+    HeapNode top = heap[0];
     heapIndex.erase(top.id);
 
     heap[0] = heap.back();
@@ -87,7 +87,7 @@ bool inHeap(long long id) {
 void printDistances(const unordered_map<long long, double>& distance) {
     cout << "Current distances:\n";
     for (const auto& [node, dist] : distance) {
-        cout << "  Node " << node << ": ";
+        cout << "  HeapNode " << node << ": ";
         if (dist == numeric_limits<double>::infinity())
             cout << "INF";
         else
@@ -114,7 +114,7 @@ void dijkstra(long long start) {
     pushHeap({start, 0.0});
 
     while (!heap.empty()) {
-        Node current = popHeap();
+        HeapNode current = popHeap();
         long long u = current.id;
 
         if (visited[u]) continue;
@@ -142,7 +142,7 @@ void dijkstra(long long start) {
 
     cout << "\nFinal shortest distances from node " << start << ":\n";
     for (const auto& [node, dist] : distance) {
-        cout << "Node " << node << ": ";
+        cout << "HeapNode " << node << ": ";
         if (dist == numeric_limits<double>::infinity()) cout << "unreachable";
         else cout << dist;
         cout << endl;
