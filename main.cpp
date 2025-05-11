@@ -19,21 +19,6 @@ constexpr int WIDTH = 5000;
 constexpr int HEIGHT = 5000;
 
 // Draw a line using Bresenham's algorithm
-void draw_line(BMP& bmp, int x1, int y1, int x2, int y2, const color& c) {
-    int dx = std::abs(x2 - x1);
-    int dy = -std::abs(y2 - y1);
-    int sx = x1 < x2 ? 1 : -1;
-    int sy = y1 < y2 ? 1 : -1;
-    int err = dx + dy;
-
-    while (true) {
-        bmp.set_pixel(x1, y1, c.r, c.g, c.b);
-        if (x1 == x2 && y1 == y2) break;
-        int e2 = 2 * err;
-        if (e2 >= dy) { err += dy; x1 += sx; }
-        if (e2 <= dx) { err += dx; y1 += sy; }
-    }
-}
 
 // Convert lat/lon to x/y using calculated scale
 void latlon_to_xy(double lat, double lon, int& x, int& y,

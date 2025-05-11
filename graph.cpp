@@ -3,6 +3,29 @@
 #include <unordered_map> // hash table
 #include <vector> // dynamic array
 #include <string> // 
+#include <cmath>
+
+const double EARTH_RADIUS_KM = 6371.0;
+
+double toRadians(double degree) {
+    return degree * M_PI / 180.0;
+}
+
+// Haversine formula to calculate distance between two coordinates
+double haversine(double lat1, double lon1, double lat2, double lon2) {
+    lat1 = toRadians(lat1);
+    lon1 = toRadians(lon1);
+    lat2 = toRadians(lat2);
+    lon2 = toRadians(lon2);
+
+    double dlat = lat2 - lat1;
+    double dlon = lon2 - lon1;
+
+    double a = sin(dlat / 2) * sin(dlat / 2) +
+               cos(lat1) * cos(lat2) * sin(dlon / 2) * sin(dlon / 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return EARTH_RADIUS_KM * c;
+}
 
 
 #include "tinyxml2.h"
@@ -28,7 +51,12 @@ struct Edge {
 
 std::map<long long, Node> nodes;
 std::vector<Way> ways;
-std::unordered_map<long long, std::unordered_map<long long, std::string>> graph;  // Adjacency list
+struct EdgeInfo {
+    std::string road_name;
+    double distance_km;
+};
+
+std::unordered_map<long long, std::unordered_map<long long, EdgeInfo>> graph;
 
 double min_lat = 1e9, max_lat = -1e9;
 double min_lon = 1e9, max_lon = -1e9;
@@ -81,9 +109,19 @@ void parse_osm(const char* filename) {
             for (size_t i = 1; i < way.node_refs.size(); ++i) {
                 long long node1 = way.node_refs[i - 1];
                 long long node2 = way.node_refs[i];
-                    graph[node1][node2] = way.name;
+                if (nodes.count(node1) && nodes.count(node2)) {
+                    double lat1 = nodes[node1].lat;
+                    double lon1 = nodes[node1].lon;
+                    double lat2 = nodes[node2].lat;
+                    double lon2 = nodes[node2].lon;
+                
+                    double dist = haversine(lat1, lon1, lat2, lon2);
+                
+                    graph[node1][node2] = {way.name, dist};
                     if (!way.is_one_way)
-                        graph[node2][node1] = way.name;  // Since roads are usually bidirectional
+                        graph[node2][node1] = {way.name, dist};
+                }
+                
             }//for
            }// is_highway
         }//way
@@ -93,12 +131,28 @@ void parse_osm(const char* filename) {
 
 void print_graph() {
     for (const auto& node : graph) {
-        std::cout << "Node" << nodes[node.first].lat << " " << nodes[node.first].lon <<"\n";
+        std::cout << "Node " << nodes[node.first].lat << " " << nodes[node.first].lon << "\n";
         for (const auto& edge : node.second) {
-            std::cout << "Edge: " << node.first << " <-> " << edge.first << " (Road: " << edge.second << ")\n";
+            std::cout << "Edge: " << node.first << " <-> " << edge.first 
+                      << " (Road: " << edge.second.road_name 
+                      << ", Distance: " << edge.second.distance_km << " km)\n";
         }
     }
 }
+
+void print_distance_between_nodes(long long node1, long long node2) {
+    if (nodes.count(node1) && nodes.count(node2)) {
+        double lat1 = nodes[node1].lat;
+        double lon1 = nodes[node1].lon;
+        double lat2 = nodes[node2].lat;
+        double lon2 = nodes[node2].lon;
+        double dist = haversine(lat1, lon1, lat2, lon2);
+        std::cout << "Distance between node " << node1 << " and " << node2 << ": " << dist << " km\n";
+    } else {
+        std::cout << "One or both nodes not found.\n";
+    }
+}
+
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -112,6 +166,16 @@ int main(int argc, char* argv[]) {
 
     // Print the graph with edge labels
     print_graph();
+
+// Call this instead in main() for quick demo:
+if (!graph.empty()) {
+    auto first = *graph.begin();
+    if (!first.second.empty()) {
+        auto second = *first.second.begin();
+        print_distance_between_nodes(first.first, second.first);
+    }
+}
+
 
     return 0;
 }
